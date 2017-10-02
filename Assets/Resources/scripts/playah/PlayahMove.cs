@@ -42,7 +42,7 @@ public class PlayahMove : MonoBehaviour
             HandleGravity();
         }
         HandleGrappling();
-        CheckCollisionDown();
+        //CheckCollisionDown();
         CheckCollisionSide();
         transform.position = position;
 	}
@@ -66,31 +66,21 @@ public class PlayahMove : MonoBehaviour
             Vector2 otherPosition = grappleTarget.transform.position;
             if (Input.GetButtonDown("Grapple"))
             {
-                grappleRadius = Vector2.Distance(position, otherPosition);
-                grappleAngle = Mathf.Atan2(position.y - otherPosition.y, position.x - otherPosition.x);
                 isGrappling = true;
-                //velocityAngle = Mathf.Atan2(GetVerticalVelocity(), horizontalVelocity);
-                grappleTorque = Mathf.Sqrt(horizontalVelocity * horizontalVelocity + GetVerticalVelocity() * GetVerticalVelocity()) / 6;
-            }
-
-            if (isGrappling)
-            {
-                position.x = otherPosition.x + Mathf.Cos(grappleAngle) * grappleRadius;
-                position.y = otherPosition.y + Mathf.Sin(grappleAngle) * grappleRadius;
-                grappleAngle += grappleTorque;
             }
 
             if (Input.GetButtonUp("Grapple"))
             {
                 isGrappling = false;
-                horizontalVelocity = Mathf.Cos(grappleAngle + Mathf.PI / 2);
+                
             }
         }
     }
 
     private void HandleJumping()
     {
-        if (Input.GetButtonDown("Jump") && isGrounded)
+
+        /*if (Input.GetButtonDown("Jump") && isGrounded)
             upVelocity = JUMP_SPEED;
 
         if (Input.GetButtonUp("Jump"))
@@ -112,7 +102,7 @@ public class PlayahMove : MonoBehaviour
                 else
                     upVelocity = 0;
             }
-        }
+        }*/
     }
 
     private void HandleMovement()
@@ -161,13 +151,15 @@ public class PlayahMove : MonoBehaviour
     {
         float newY = position.y;
         RaycastHit2D[] hitsL = new RaycastHit2D[4];
+        RaycastHit2D[] hitsM = new RaycastHit2D[4];
         RaycastHit2D[] hitsR = new RaycastHit2D[4];
         ContactFilter2D filter = new ContactFilter2D();
         filter.NoFilter();
-        Physics2D.Raycast(new Vector2(position.x + spriteSize.x / 2, position.y), -Vector2.up, filter, hitsL, spriteSize.y / 2 + GetVerticalVelocity() * Time.deltaTime);
-        Physics2D.Raycast(new Vector2(position.x - spriteSize.x / 2, position.y), -Vector2.up, filter, hitsR, spriteSize.y / 2 + GetVerticalVelocity() * Time.deltaTime);
+        Physics2D.Raycast(new Vector2(position.x + spriteSize.x / 2, position.y), -Vector2.up, filter, hitsL, spriteSize.y / 2 - GetVerticalVelocity() * Time.deltaTime);
+        Physics2D.Raycast(new Vector2(position.x - spriteSize.x / 2, position.y), -Vector2.up, filter, hitsR, spriteSize.y / 2 - GetVerticalVelocity() * Time.deltaTime);
+        Physics2D.Raycast(new Vector2(position.x, position.y), -Vector2.up, filter, hitsR, spriteSize.y / 2 - GetVerticalVelocity() * Time.deltaTime);
         bool hitAnything = false;
-        foreach (RaycastHit2D[] hits in new RaycastHit2D[][]{hitsL, hitsR})
+        foreach (RaycastHit2D[] hits in new RaycastHit2D[][]{hitsL, hitsM, hitsR})
         for (int i = 0; i < hits.Length; i++)
         {
             RaycastHit2D hit = hits[i];
